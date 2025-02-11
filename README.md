@@ -198,8 +198,8 @@ erDiagram
 ### Query Optimization Techniques
 
 1. **Indexing**
-   - Unique index on CarPark.CarParkNo
-   - Index on User.Email
+   - Unique index on CarPark.CarParkNo, FreeParking, NightParking and Gantry Height 
+   - Enables faster querying
    - Composite index on UserFavorite (UserId, CarParkNo)
 
 2. **Efficient Queries**
@@ -209,15 +209,13 @@ erDiagram
 
 3. **Data Loading**
    - Bulk operations for CSV imports
-   - Delta updates support
    - Transaction rollback on failure
 
 ### Security Considerations
 
 1. **Password Security**
    - BCrypt hashing for passwords
-   - Salt rounds configuration
-
+     
 2. **API Security**
    - JWT token encryption
 
