@@ -1,0 +1,15 @@
+*.db
+*.db-shm
+*.db-wal
+
+CarParkInfo.API/obj/
+CarParkInfo.API/bin/
+
+CarParkInfo.Core/obj/
+CarParkInfo.Core/bin/
+
+CarParkInfo.Data/obj/
+CarParkInfo.Data/bin/
+
+CarParkInfo.Tests/obj/
+CarParkInfo.Tests/bin/
