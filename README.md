@@ -1,53 +1,230 @@
-# Carpark-Info
-A take-home coding assignment for backend developer interview. 
+# CarPark-Info
 
-## Your Task
-1. Given the CSV dataset (hdb-carpark-information-<timestamp>.csv) that contains details of a list of carparks, design the database to store the given information in the dataset and to support the below given user stories. ER diagram should be provided.
-2. Write a batch job that will process and store the information into the database of your choice. This is a daily delta file that will be interfaced over from source. In the event there is an error processing the records in the file, the entire file should rollback.
-3. Write the APIs that will fulfill the below given user stories. Swagger documentation should be provided. No front-end screens are required to be developed - just the APIs. However, you should be prepared to articulate how the APIs are envisoned to be utilised by the front-end developer. :)
+A .NET Core backend application for managing and accessing carpark information.
 
-### User Stories
-* As a user, I want to be able to filter the list of carpark by the following criteria:
-  - Carpark that offer free parking
-  - Carpark that offer night parking
-  - Carpark that can meet my vehicle height requirement.
-* As a user, I want to be able to add a specific carpark as my favourite.
+## Table of Contents
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [API Documentation](#api-documentation)
+- [Authentication](#authentication)
+- [Database Design & Optimization](#database-design--optimization)
+
+## Features
+
+### User Stories Implemented
+1. **Carpark Filtering** 🔍
+   - ✅ Filter carparks offering free parking
+   - 🌙 Filter carparks with night parking availability
+   - 📏 Filter carparks by vehicle height requirements
+
+2. **User Features** 👤
+   - ⭐ Save favorite carparks
+   - 📋 Manage favorite carparks list
+
+## Tech Stack
+
+- **.NET Core 8.0**
+  - Entity Framework Core with SQLite
+  - JWT Authentication
+  - Swagger/OpenAPI documentation
+  - CsvHelper for CSV processing
 
 ## Getting Started
-Please review the information in this section before you get started with your development. 
 
-* Create a personal fork of the project on Github.
-* Clone the fork on your local machine.
-* Implement your solution and the rest of git basics applies.
-* When you are ready, submit the forked repo for review by providing the link to the repo to our recruitment team.
+### Prerequisites
+- .NET SDK 8.0
+- Git
 
-### Tech Stack
-You may choose to develop the application using either of the following stack:
-* Spring Boot / Spring Batch with H2 database and ORM of your choice
-* .NET Core 6.x with SQLite database and ORM of your choice
-* Node.js with an in-memory database of your choice
+### Installation
 
-Note: You are encouraged to try out .NET Core as Microsoft technologies are primarily used within the firm.
+1. Clone the repository
+```bash
+git clone https://github.com/s4nat/carpark-info-assignment.git
+cd carpark-info-assignment
+```
 
-### Tools
-You are free to choose the IDE (Integrated Development Environment) tool you are most comfortable with.
+2. Backend Setup
+```bash
+# Navigate to API project
+cd CarParkInfo.API
 
-## Basic Expectation
-* Ability to design data schema, apply normalisation technique and enhance query performances, if applicable.
-* Write readable, maintainable, performant and well-documented codes.
-* Code design / architecture should support implementation of unit testing.
-* Code design / architecture should be flexible to changes / open to extensions, e.g. changing of data access technology, changing of interface file format from csv to JSON etc.
-* Write clear and concise commit message.
+# Restore dependencies
+dotnet restore
 
-## Challenge Yourself
-Additional consideration to fine-tune your solution. It's not a must to implement in this assignment but please be prepared to discuss:
-* The dataset has the potential to be large in size.
-* Minimal human intervention for job recovery.
-* Secure coding practices
-* API authentication and authorisation
+# Apply database migrations
+dotnet ef database update
 
-## Time Estimates
-This assignment should take about 2 to 4 hours of your time depending on your level of experiences. 
+# Start the backend server
+dotnet run
+```
 
-## Need Help
-Create a github issue. We'll get back to you.
+The application will be available at:
+- Backend API: https://localhost:7001
+- Swagger Documentation: https://localhost:7001/swagger
+
+## API Documentation
+
+### Authentication Endpoints
+
+#### POST /api/Auth/register
+Register a new user account.
+```json
+{
+  "email": "user@example.com",
+  "username": "username",
+  "password": "password123"
+}
+```
+
+#### POST /api/Auth/login
+Login with existing credentials.
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+### Carpark Endpoints
+
+#### GET /api/CarParks/free-parking
+Get all carparks that offer free parking.
+
+#### GET /api/CarParks/night-parking
+Get all carparks that offer night parking.
+
+#### GET /api/CarParks/by-height/{minHeight}
+Get carparks that meet the minimum height requirement.
+
+#### POST /api/CarParks/favorites/{carParkNo}
+Add a carpark to user's favorites (requires authentication).
+
+#### GET /api/CarParks/favorites
+Get user's favorite carparks (requires authentication).
+
+#### DELETE /api/CarParks/favorites/{carParkNo}
+Remove a carpark from user's favorites (requires authentication).
+
+## Authentication
+
+The application uses JWT (JSON Web Token) for authentication:
+
+1. **Token Generation**: Upon successful login/registration, the server generates a JWT containing:
+   - User ID
+   - Username
+   - Email
+   - Expiration time (7 days)
+
+2. **Token Usage**: 
+   - Include token in Authorization header
+   - Format: `Bearer <your-token>`
+
+3. **Protected Routes**:
+   - All favorites-related endpoints require authentication
+   - Token validation middleware checks for valid token
+
+## Database Design & Optimization
+
+### Database Schema Design
+
+The application uses a relational database (SQLite) with the following key entities and relationships:
+
+#### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    CarPark {
+        string Id PK
+        string CarParkNo UK
+        string Address
+        float XCoord
+        float YCoord
+        string CarParkType
+        string TypeOfParkingSystem
+        string ShortTermParking
+        string FreeParking
+        string NightParking
+        int CarParkDecks
+        float GantryHeight
+        string CarParkBasement
+    }
+
+    User {
+        string Id PK
+        string Email UK
+        string Username
+        string PasswordHash
+        datetime CreatedAt
+        datetime LastLoginAt
+    }
+
+    UserFavorite {
+        int Id PK
+        string UserId FK
+        string CarParkNo FK
+        datetime CreatedAt
+    }
+
+    User ||--o{ UserFavorite : "has"
+    CarPark ||--o{ UserFavorite : "saved_by"
+```
+
+#### Key Design Decisions
+
+1. **CarPark Entity**
+   - Uses GUIDs (string Id) as primary key for scalability
+   - CarParkNo is made unique to ensure data integrity
+   - Maintains original data structure from CSV while adding necessary database fields
+
+2. **User Entity**
+   - Uses GUIDs for primary key
+   - Email uniqueness enforced at database level
+   - Includes audit fields (CreatedAt, LastLoginAt) for tracking
+
+3. **UserFavorite Entity**
+   - Junction table implementing many-to-many relationship between Users and CarParks
+   - Uses auto-incrementing integer ID for simplicity
+   - Includes CreatedAt for auditing purposes
+   - Composite unique index on (UserId, CarParkNo) prevents duplicate favorites
+
+#### Data Normalization
+- The schema follows 3NF (Third Normal Form)
+- No redundant data storage
+- All non-key attributes are:
+  - Fully functionally dependent on the primary key
+  - Not transitively dependent on the primary key
+
+### Query Optimization Techniques
+
+1. **Indexing**
+   - Unique index on CarPark.CarParkNo
+   - Index on User.Email
+   - Composite index on UserFavorite (UserId, CarParkNo)
+
+2. **Efficient Queries**
+   - Use of Include() for eager loading related entities
+   - Async/await for all database operations
+   - Transaction management for CSV imports
+
+3. **Data Loading**
+   - Bulk operations for CSV imports
+   - Delta updates support
+   - Transaction rollback on failure
+
+### Security Considerations
+
+1. **Password Security**
+   - BCrypt hashing for passwords
+   - Salt rounds configuration
+
+2. **API Security**
+   - JWT token encryption
+
+## Contributing
+
+Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
