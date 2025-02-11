@@ -60,8 +60,8 @@ dotnet run
 ```
 
 The application will be available at:
-- Backend API: https://localhost:7001
-- Swagger Documentation: https://localhost:7001/swagger
+- Backend API: https://localhost:5005
+- Swagger Documentation: https://localhost:5005/swagger
 
 ## API Documentation
 
